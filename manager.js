@@ -160,6 +160,26 @@ async function toggleDayCollapse(day) {
   }
 }
 
+async function toggleCollectionHighlight(day, timestamp) {
+  try {
+    const data = await chrome.storage.local.get(["tabsByDay", "highlightedCollections"]);
+    const highlightedCollections = data.highlightedCollections || {};
+    
+    const collectionKey = `${day}-${timestamp}`;
+    
+    if (highlightedCollections[collectionKey]) {
+      delete highlightedCollections[collectionKey];
+    } else {
+      highlightedCollections[collectionKey] = true;
+    }
+    
+    await chrome.storage.local.set({ highlightedCollections });
+    await displayTabs();
+  } catch (error) {
+    console.error('Error toggling highlight:', error);
+  }
+}
+
 
 function groupByCollection(tabs) {
   const collections = new Map();
@@ -191,10 +211,16 @@ function createTabList(tabs, day) {
       openAndRemoveTab(day, tab.timestamp, tab.url);
     });
 
+    const tabUrlContainer = document.createElement('div');
+    tabUrlContainer.className = 'tab-url-container';
+    
     const tabUrl = document.createElement('div');
     tabUrl.className = 'tab-url';
     tabUrl.textContent = tab.url;
+    tabUrl.title = tab.url; // Add tooltip
     
+    tabUrlContainer.appendChild(tabUrl);
+
     const deleteButton = document.createElement('button');
     deleteButton.className = 'button delete-button';
     deleteButton.textContent = 'Remove';
@@ -204,7 +230,7 @@ function createTabList(tabs, day) {
     });
 
     tabContent.appendChild(tabTitle);
-    tabContent.appendChild(tabUrl);
+    tabContent.appendChild(tabUrlContainer);
     tabItem.appendChild(tabContent);
     tabItem.appendChild(deleteButton);
     tabList.appendChild(tabItem);
@@ -317,7 +343,6 @@ async function exportTabs() {
       exportDate: new Date().toISOString()
     };
 
-    // Create blob and download link
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
@@ -325,12 +350,10 @@ async function exportTabs() {
     downloadLink.href = url;
     downloadLink.download = `tab-manager-export-${new Date().toISOString().split('T')[0]}.json`;
     
-    // Trigger download
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
     
-    // Cleanup
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error exporting tabs:', error);
@@ -338,9 +361,125 @@ async function exportTabs() {
   }
 }
 
-// Modify the DOMContentLoaded event listener to add the export button
+// Add new import function
+async function importTabs() {
+  try {
+    // Create file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    
+    // Handle file selection
+    fileInput.onchange = async (e) => {
+      try {
+        const file = e.target.files[0];
+        if (!file) {
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const importedData = JSON.parse(event.target.result);
+            
+            // Validate imported data structure
+            if (!importedData.tabsByDay || typeof importedData.tabsByDay !== 'object') {
+              throw new Error('Invalid data format: missing or invalid tabsByDay');
+            }
+
+            // Validate each tab entry
+            for (const day in importedData.tabsByDay) {
+              if (!Array.isArray(importedData.tabsByDay[day])) {
+                throw new Error(`Invalid data format: tabs for day ${day} is not an array`);
+              }
+
+              importedData.tabsByDay[day].forEach((tab, index) => {
+                if (!tab.url || !tab.timestamp) {
+                  throw new Error(`Invalid tab data at day ${day}, index ${index}`);
+                }
+              });
+            }
+
+            // Get current data
+            const currentData = await chrome.storage.local.get(["tabsByDay", "highlightedCollections"]);
+            const currentTabs = currentData.tabsByDay || {};
+            const currentHighlights = currentData.highlightedCollections || {};
+
+            // Merge data
+            const mergedTabs = { ...currentTabs };
+            for (const day in importedData.tabsByDay) {
+              if (mergedTabs[day]) {
+                // If day exists, append new tabs
+                mergedTabs[day] = [...mergedTabs[day], ...importedData.tabsByDay[day]];
+              } else {
+                // If day doesn't exist, add all tabs
+                mergedTabs[day] = importedData.tabsByDay[day];
+              }
+            }
+
+            const mergedHighlights = {
+              ...currentHighlights,
+              ...(importedData.highlightedCollections || {})
+            };
+
+            // Save merged data
+            await chrome.storage.local.set({
+              tabsByDay: mergedTabs,
+              highlightedCollections: mergedHighlights
+            });
+
+            // Count imported tabs
+            const importedTabCount = Object.values(importedData.tabsByDay)
+              .reduce((total, dayTabs) => total + dayTabs.length, 0);
+
+            alert(`Successfully imported ${importedTabCount} tabs`);
+            displayTabs();
+          } catch (error) {
+            console.error('Error processing import:', error);
+            alert('Error processing import: ' + error.message);
+          }
+        };
+
+        reader.readAsText(file);
+      } catch (error) {
+        console.error('Error reading file:', error);
+        alert('Error reading file: ' + error.message);
+      }
+    };
+
+    // Trigger file selection
+    fileInput.click();
+  } catch (error) {
+    console.error('Error in importTabs:', error);
+    alert('Error importing tabs: ' + error.message);
+  }
+}
+
+async function removeAllData() {
+  // Show confirmation dialog
+  const confirmed = confirm(
+    'Are you sure you want to remove all saved tabs and collections?\n\nThis action cannot be undone. You may want to export your data first.'
+  );
+  
+  if (confirmed) {
+    try {
+      // Clear all data from storage
+      await chrome.storage.local.clear();
+      
+      // Refresh the display
+      await displayTabs();
+      
+      alert('All data has been successfully removed.');
+    } catch (error) {
+      console.error('Error removing data:', error);
+      alert('Error removing data: ' + error.message);
+    }
+  }
+}
+
+// Add this to your DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', () => {
-  // Existing collect button listener
+  // Existing button listeners...
   document.getElementById('collectButton').addEventListener('click', async () => {
     try {
       const response = await chrome.runtime.sendMessage({ action: "collectTabs" });
@@ -355,8 +494,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Add export button listener
   document.getElementById('exportButton').addEventListener('click', exportTabs);
+  document.getElementById('importButton').addEventListener('click', importTabs);
+  
+  // Add remove all button listener
+  document.getElementById('removeAllButton').addEventListener('click', removeAllData);
 
   displayTabs();
   setInterval(displayTabs, 60000);
