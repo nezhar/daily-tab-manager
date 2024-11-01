@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background -->
+  <rect x="12" y="24" width="104" height="80" rx="8" fill="#4285F4"/>
+  
+  <!-- Tab strips -->
+  <rect x="24" y="40" width="80" height="10" rx="2" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="24" y="60" width="80" height="10" rx="2" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="24" y="80" width="80" height="10" rx="2" fill="#FFFFFF" opacity="0.3"/>
+  
+  <!-- Chrome icon corner styling -->
+  <path d="M20 24 L108 24 A8 8 0 0 1 116 32 L116 96 A8 8 0 0 1 108 104 L20 104 A8 8 0 0 1 12 96 L12 32 A8 8 0 0 1 20 24" 
+        fill="none" 
+        stroke="#FFFFFF" 
+        stroke-width="4"/>
+</svg>

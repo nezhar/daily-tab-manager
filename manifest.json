@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Daily Tab Manager",
+  "version": "1.0",
+  "description": "Organizes your tabs by day in a pinned tab",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Daily Tab Manager"
+  },
+  "icons": {
+    "48": "icon48.svg",
+    "128": "icon128.svg"
+  }
+}

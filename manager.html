@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Daily Tab Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+
+    #collectButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #collectButton:hover {
+      background-color: #45a049;
+    }
+
+    .day-box {
+      background-color: white;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .day-header {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8f9fa;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .day-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .tab-count {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .collection-header {
+      padding: 12px 15px;
+      background-color: #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #dee2e6;
+      border-left: 4px solid #6c757d;
+    }
+
+    .collection-header.highlighted {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+    }
+
+    .time-label {
+      color: #495057;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tab-list {
+      padding: 10px 15px;
+    }
+
+    .tab-list.highlighted {
+      background-color: #fff9e6;
+    }
+
+    .tab-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      gap: 15px;
+    }
+
+    .tab-item:last-child {
+      border-bottom: none;
+    }
+
+    .tab-title {
+      flex-grow: 1;
+      font-size: 16px;
+      color: #2c3e50;
+      cursor: pointer;
+      font-weight: 500;
+      min-width: 0;
+    }
+
+    .tab-title:hover {
+      color: #007bff;
+    }
+
+    .tab-url {
+      font-size: 12px;
+      color: #6c757d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+      cursor: default;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .open-button {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .open-button:hover {
+      background-color: #0056b3;
+    }
+
+    .delete-button {
+      background-color: #dc3545;
+      color: white;
+      align-self: flex-start;
+    }
+
+    .delete-button:hover {
+      background-color: #c82333;
+    }
+
+    .highlight-button {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .highlight-button:hover {
+      background-color: #5a6268;
+    }
+
+    .highlight-button.active {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    /* Smooth transitions */
+    .collection-header,
+    .tab-list {
+      transition: background-color 0.3s ease;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .export-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .export-button:hover {
+      background-color: #0052a3;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <button id="collectButton">Collect All Current Tabs</button>
+    <button id="exportButton" class="export-button">Export Data</button>
+  </div>
+  <div id="container"></div>
+  <script src="manager.js"></script>
+</body>
+</html>
