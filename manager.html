@@ -194,6 +194,63 @@
     .export-button:hover {
       background-color: #0052a3;
     }
+
+    .collapse-toggle {
+      display: inline-block;
+      font-size: 12px;
+      margin-right: 8px;
+      color: #666;
+      transition: transform 0.2s ease;
+      pointer-events: none; /* Make the icon non-interactive */
+    }
+
+    .day-header.collapsed .collapse-toggle {
+      transform: rotate(-90deg);
+    }
+
+    .day-header {
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .day-header:hover {
+      background: #eaeaea;
+    }
+
+    .day-content {
+      transition: max-height 0.3s ease-out;
+      max-height: 9999px;
+      overflow: hidden;
+    }
+
+    .day-content.collapsed {
+      max-height: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .day-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .tab-count {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    /* Add hover effect */
+    .day-header:hover .collapse-toggle {
+      color: #333;
+    }
   </style>
 </head>
 <body>

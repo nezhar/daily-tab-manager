@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('exportButton').addEventListener('click', exportTabs);
   displayTabs();
   setInterval(displayTabs, 60000);
 });
@@ -20,9 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function displayTabs() {
   try {
     const container = document.getElementById('container');
-    const data = await chrome.storage.local.get(["tabsByDay", "highlightedCollections"]);
+    const data = await chrome.storage.local.get(["tabsByDay", "highlightedCollections", "collapsedDays"]);
     const tabsByDay = data.tabsByDay || {};
     const highlightedCollections = data.highlightedCollections || {};
+    const collapsedDays = data.collapsedDays || {};
     
     // Sort days in reverse chronological order
     const sortedDays = Object.keys(tabsByDay).sort().reverse();
@@ -36,10 +38,25 @@ async function displayTabs() {
       
       // Create header
       const dayHeader = document.createElement('div');
-      dayHeader.className = 'day-header';
+      dayHeader.className = `day-header ${collapsedDays[day] ? 'collapsed' : ''}`;
+      
+      // Add click handler to the entire header
+      dayHeader.addEventListener('click', (e) => {
+        // Only toggle if the click was on the header itself or the toggle icon
+        // not on any other interactive elements that might be in the header
+        if (e.target.closest('.button-group') === null) {
+          toggleDayCollapse(day);
+        }
+      });
       
       const headerLeft = document.createElement('div');
       headerLeft.className = 'header-left';
+
+      // Add collapse toggle icon (now just visual, not interactive)
+      const toggleIcon = document.createElement('span');
+      toggleIcon.className = 'collapse-toggle';
+      toggleIcon.innerHTML = collapsedDays[day] ? '&#9654;' : '&#9660;';
+      headerLeft.appendChild(toggleIcon);
 
       const dayTitle = document.createElement('div');
       dayTitle.className = 'day-title';
@@ -54,6 +71,10 @@ async function displayTabs() {
       dayHeader.appendChild(headerLeft);
       dayBox.appendChild(dayHeader);
 
+      // Create content container
+      const dayContent = document.createElement('div');
+      dayContent.className = `day-content ${collapsedDays[day] ? 'collapsed' : ''}`;
+      
       // Group tabs by collection (timestamp)
       const collections = groupByCollection(tabs);
       
@@ -75,7 +96,6 @@ async function displayTabs() {
         const buttonGroup = document.createElement('div');
         buttonGroup.className = 'button-group';
 
-        // Add highlight button
         const highlightButton = document.createElement('button');
         highlightButton.className = `button highlight-button ${isHighlighted ? 'active' : ''}`;
         highlightButton.textContent = isHighlighted ? 'Unhighlight' : 'Highlight';
@@ -110,10 +130,11 @@ async function displayTabs() {
           tabList.classList.add('highlighted');
         }
         
-        dayBox.appendChild(collectionHeader);
-        dayBox.appendChild(tabList);
+        dayContent.appendChild(collectionHeader);
+        dayContent.appendChild(tabList);
       });
 
+      dayBox.appendChild(dayContent);
       container.appendChild(dayBox);
     });
   } catch (error) {
@@ -121,25 +142,24 @@ async function displayTabs() {
   }
 }
 
-async function toggleCollectionHighlight(day, timestamp) {
+async function toggleDayCollapse(day) {
   try {
-    const data = await chrome.storage.local.get(["tabsByDay", "highlightedCollections"]);
-    const highlightedCollections = data.highlightedCollections || {};
+    const data = await chrome.storage.local.get("collapsedDays");
+    const collapsedDays = data.collapsedDays || {};
     
-    const collectionKey = `${day}-${timestamp}`;
-    
-    if (highlightedCollections[collectionKey]) {
-      delete highlightedCollections[collectionKey];
+    if (collapsedDays[day]) {
+      delete collapsedDays[day];
     } else {
-      highlightedCollections[collectionKey] = true;
+      collapsedDays[day] = true;
     }
     
-    await chrome.storage.local.set({ highlightedCollections });
+    await chrome.storage.local.set({ collapsedDays });
     await displayTabs();
   } catch (error) {
-    console.error('Error toggling highlight:', error);
+    console.error('Error toggling day collapse:', error);
   }
 }
+
 
 function groupByCollection(tabs) {
   const collections = new Map();
