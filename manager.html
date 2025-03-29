@@ -659,6 +659,38 @@
         background-size: contain;
         vertical-align: middle;
       }
+
+      /* Add these styles before the closing style tag */
+      .search-container {
+        position: relative;
+        margin: 0 10px;
+      }
+
+      #searchInput {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 14px;
+        width: 200px;
+        background-color: var(--surface);
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+      }
+
+      #searchInput:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      #searchInput::placeholder {
+        color: var(--text-secondary);
+      }
+
+      /* Dark theme adjustments */
+      body.dark-theme #searchInput {
+        background-color: var(--surface-accent);
+      }
     </style>
   </head>
   <body>
@@ -667,6 +699,9 @@
       <button id="exportButton" class="export-button" title="Export Data"></button>
       <button id="importButton" class="import-button" title="Import Data"></button>
       <button id="themeToggle" class="theme-toggle" title="Toggle Dark Mode"></button>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search tabs..." title="Search by title or URL">
+      </div>
       <button id="removeAllButton" title="Remove All Data"></button>
     </div>
     <div id="container"></div>

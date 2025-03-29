@@ -18,11 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   document.getElementById("exportButton").addEventListener("click", exportTabs);
+  
+  // Add search functionality
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", () => {
+    displayTabs(searchInput.value.trim());
+  });
+
   displayTabs();
-  setInterval(displayTabs, 60000);
+  setInterval(() => displayTabs(searchInput.value.trim()), 60000);
 });
 
-async function displayTabs() {
+async function displayTabs(searchQuery = "") {
   try {
     const container = document.getElementById("container");
     const data = await chrome.storage.local.get([
@@ -41,6 +48,19 @@ async function displayTabs() {
 
     sortedDays.forEach((day) => {
       const tabs = tabsByDay[day];
+      
+      // Filter tabs based on search query if one exists
+      const filteredTabs = searchQuery
+        ? tabs.filter(
+            (tab) =>
+              tab.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              tab.url.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : tabs;
+
+      // Skip empty days after filtering
+      if (filteredTabs.length === 0) return;
+
       const dayBox = document.createElement("div");
       dayBox.className = "day-box";
 
@@ -74,7 +94,7 @@ async function displayTabs() {
 
       const tabCount = document.createElement("div");
       tabCount.className = "tab-count";
-      tabCount.textContent = `${tabs.length} tabs`;
+      tabCount.textContent = `${filteredTabs.length} tabs`;
 
       headerLeft.appendChild(dayTitle);
       headerLeft.appendChild(tabCount);
@@ -88,7 +108,7 @@ async function displayTabs() {
       }`;
 
       // Group tabs by collection (timestamp)
-      const collections = groupByCollection(tabs);
+      const collections = groupByCollection(filteredTabs);
 
       collections.forEach((collectionTabs, timestamp) => {
         const collectionHeader = document.createElement("div");
@@ -129,7 +149,7 @@ async function displayTabs() {
         deleteCollectionButton.title = "Remove Link";
         deleteCollectionButton.addEventListener("click", async () => {
           await removeCollection(day, timestamp);
-          displayTabs();
+          displayTabs(searchQuery);
         });
 
         buttonGroup.appendChild(highlightButton);
@@ -168,7 +188,9 @@ async function toggleDayCollapse(day) {
     }
 
     await chrome.storage.local.set({ collapsedDays });
-    await displayTabs();
+    // Get the current search query and pass it to displayTabs
+    const searchInput = document.getElementById("searchInput");
+    await displayTabs(searchInput.value.trim());
   } catch (error) {
     console.error("Error toggling day collapse:", error);
   }
@@ -191,7 +213,9 @@ async function toggleCollectionHighlight(day, timestamp) {
     }
 
     await chrome.storage.local.set({ highlightedCollections });
-    await displayTabs();
+    // Get the current search query and pass it to displayTabs
+    const searchInput = document.getElementById("searchInput");
+    await displayTabs(searchInput.value.trim());
   } catch (error) {
     console.error("Error toggling highlight:", error);
   }
@@ -242,7 +266,9 @@ function createTabList(tabs, day) {
     deleteButton.title = "Remove Link";
     deleteButton.addEventListener("click", async () => {
       await removeTab(day, tab.timestamp, tab.url);
-      displayTabs();
+      // Get the current search query and pass it to displayTabs
+      const searchInput = document.getElementById("searchInput");
+      await displayTabs(searchInput.value.trim());
     });
 
     tabContent.appendChild(tabTitle);
@@ -275,7 +301,9 @@ async function openAndRemoveTab(day, timestamp, url) {
   try {
     await chrome.tabs.create({ url });
     await removeTab(day, timestamp, url);
-    await displayTabs();
+    // Get the current search query and pass it to displayTabs
+    const searchInput = document.getElementById("searchInput");
+    await displayTabs(searchInput.value.trim());
   } catch (error) {
     console.error("Error in openAndRemoveTab:", error);
   }
@@ -301,7 +329,9 @@ async function openAndRemoveCollection(day, timestamp) {
 
       // Then remove the collection
       await removeCollection(day, timestamp);
-      await displayTabs();
+      // Get the current search query and pass it to displayTabs
+      const searchInput = document.getElementById("searchInput");
+      await displayTabs(searchInput.value.trim());
     }
   } catch (error) {
     console.error("Error in openAndRemoveCollection:", error);
