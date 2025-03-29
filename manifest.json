@@ -3,6 +3,10 @@
   "name": "Daily Tab Manager",
   "version": "1.0.0",
   "description": "Organizes your tabs by day in a pinned tab",
+  "author": "nezhar",
+  "homepage_url": "https://github.com/nezhar/daily-tab-manager",
+  "minimum_chrome_version": "88",
+  "offline_enabled": true,
   "permissions": ["tabs", "storage"],
   "background": {
     "service_worker": "background.js"
