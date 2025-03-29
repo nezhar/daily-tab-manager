@@ -14,12 +14,14 @@ A Chrome extension that helps you organize and manage your browser tabs by autom
 ## How It Works
 
 1. **Collection Management**:
+
    - Click "Collect All Current Tabs" to save all open tabs into a timestamped collection
    - Collections can be highlighted for importance
    - Open entire collections with a single click
    - Remove collections you no longer need
 
 2. **Organization Features**:
+
    - Expand/collapse days to manage your view
    - Each collection shows the exact time it was created
    - Individual tabs display both title and URL
@@ -41,17 +43,20 @@ A Chrome extension that helps you organize and manage your browser tabs by autom
 ## Usage
 
 ### Basic Operations
+
 - **Save Current Tabs**: Click "Collect All Current Tabs" to save all open tabs
 - **View Saved Tabs**: All saved tabs appear in the pinned manager tab
 - **Open Tabs**: Click on any tab title to open it
 - **Remove Tabs**: Use the "Remove" button next to each tab
 
 ### Collections
+
 - **Open Collections**: Click "Open Collection" to restore all tabs in a collection
 - **Highlight Collections**: Use the "Highlight" button to mark important collections
 - **Remove Collections**: Click "Remove Collection" to delete entire collections
 
 ### Data Management
+
 - **Export Data**: Click "Export Data" to save your tab collections
 - **Import Data**: Click "Import Data" to restore previously exported collections
 - **Reset**: Use "Remove All Data" to clear all saved tabs and collections
@@ -59,6 +64,7 @@ A Chrome extension that helps you organize and manage your browser tabs by autom
 ## Storage Structure
 
 Data is stored in Chrome's local storage with the following structure:
+
 ```javascript
 {
   "tabsByDay": {
@@ -82,6 +88,7 @@ Data is stored in Chrome's local storage with the following structure:
 ## Permissions
 
 The extension requires the following permissions:
+
 - `tabs`: For accessing and managing browser tabs
 - `storage`: For saving tab data locally
 

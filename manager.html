@@ -1,377 +1,541 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Daily Tab Manager</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f5f5f5;
-    }
+  <head>
+    <title>Daily Tab Manager</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
 
-    #collectButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+      #collectButton {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
 
-    #collectButton:hover {
-      background-color: #45a049;
-    }
+      #collectButton:hover {
+        background-color: #45a049;
+      }
 
-    .day-box {
-      background-color: white;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+      .day-box {
+        background-color: white;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
 
-    .day-header {
-      padding: 15px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #f8f9fa;
-    }
+      .day-header {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8f9fa;
+      }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
 
-    .day-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
+      .day-title {
+        font-size: 18px;
+        font-weight: bold;
+      }
 
-    .tab-count {
-      color: #666;
-      font-size: 14px;
-    }
+      .tab-count {
+        color: #666;
+        font-size: 14px;
+      }
 
-    .collection-header {
-      padding: 12px 15px;
-      background-color: #e9ecef;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #dee2e6;
-      border-left: 4px solid #6c757d;
-    }
+      .collection-header {
+        padding: 12px 15px;
+        background-color: #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #dee2e6;
+        border-left: 4px solid #6c757d;
+      }
 
-    .collection-header.highlighted {
-      background-color: #fff3cd;
-      border-left: 4px solid #ffc107;
-    }
+      .collection-header.highlighted {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+      }
 
-    .time-label {
-      color: #495057;
-      font-size: 14px;
-      font-weight: 500;
-    }
+      .time-label {
+        color: #495057;
+        font-size: 14px;
+        font-weight: 500;
+      }
 
-    .tab-list {
-      padding: 10px 15px;
-    }
+      .tab-list {
+        padding: 10px 15px;
+      }
 
-    .tab-list.highlighted {
-      background-color: #fff9e6;
-    }
+      .tab-list.highlighted {
+        background-color: #fff9e6;
+      }
 
-    .tab-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-      gap: 15px;
-    }
+      .tab-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        gap: 15px;
+      }
 
-    .tab-item:last-child {
-      border-bottom: none;
-    }
+      .tab-item:last-child {
+        border-bottom: none;
+      }
 
-    .tab-title {
-      flex-grow: 1;
-      font-size: 16px;
-      color: #2c3e50;
-      cursor: pointer;
-      font-weight: 500;
-      min-width: 0;
-    }
+      .tab-title {
+        flex-grow: 1;
+        font-size: 16px;
+        color: #2c3e50;
+        cursor: pointer;
+        font-weight: 500;
+        min-width: 0;
+      }
 
-    .tab-title:hover {
-      color: #007bff;
-    }
+      .tab-title:hover {
+        color: #007bff;
+      }
 
-    .tab-url {
-      font-size: 12px;
-      color: #6c757d;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 2px;
-      cursor: default;
-    }
+      .tab-url {
+        font-size: 12px;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+        cursor: default;
+      }
 
-    .button-group {
-      display: flex;
-      gap: 8px;
-    }
+      .button-group {
+        display: flex;
+        gap: 8px;
+      }
 
-    .button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      white-space: nowrap;
-    }
+      .button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        white-space: nowrap;
+      }
 
-    .open-button {
-      background-color: #007bff;
-      color: white;
-    }
+      .open-button {
+        background-color: #007bff;
+        color: white;
+      }
 
-    .open-button:hover {
-      background-color: #0056b3;
-    }
+      .open-button:hover {
+        background-color: #0056b3;
+      }
 
-    .delete-button {
-      background-color: #dc3545;
-      color: white;
-      align-self: flex-start;
-    }
+      .delete-button {
+        background-color: #dc3545;
+        color: white;
+        align-self: flex-start;
+      }
 
-    .delete-button:hover {
-      background-color: #c82333;
-    }
+      .delete-button:hover {
+        background-color: #c82333;
+      }
 
-    .highlight-button {
-      background-color: #6c757d;
-      color: white;
-    }
+      .highlight-button {
+        background-color: #6c757d;
+        color: white;
+      }
 
-    .highlight-button:hover {
-      background-color: #5a6268;
-    }
+      .highlight-button:hover {
+        background-color: #5a6268;
+      }
 
-    .highlight-button.active {
-      background-color: #ffc107;
-      color: black;
-    }
+      .highlight-button.active {
+        background-color: #ffc107;
+        color: black;
+      }
 
-    /* Smooth transitions */
-    .collection-header,
-    .tab-list {
-      transition: background-color 0.3s ease;
-    }
+      /* Smooth transitions */
+      .collection-header,
+      .tab-list {
+        transition: background-color 0.3s ease;
+      }
 
-    .button-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding: 10px;
-      background: #f5f5f5;
-      border-radius: 4px;
-    }
+      .button-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 4px;
+      }
 
-    .button-container button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
+      .button-container button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+      }
 
-    .button-container button:hover {
-      transform: translateY(-1px);
-    }
+      .button-container button:hover {
+        transform: translateY(-1px);
+      }
 
-    .button-container button:active {
-      transform: translateY(0);
-    }
+      .button-container button:active {
+        transform: translateY(0);
+      }
 
-    /* Collect button */
-    #collectButton {
-      background-color: #4CAF50;
-      color: white;
-    }
+      /* Collect button */
+      #collectButton {
+        background-color: #4caf50;
+        color: white;
+      }
 
-    #collectButton:hover {
-      background-color: #45a049;
-    }
+      #collectButton:hover {
+        background-color: #45a049;
+      }
 
-    /* Export button */
-    #exportButton {
-      background-color: #2196F3;
-      color: white;
-    }
+      /* Export button */
+      #exportButton {
+        background-color: #2196f3;
+        color: white;
+      }
 
-    #exportButton:hover {
-      background-color: #1e88e5;
-    }
+      #exportButton:hover {
+        background-color: #1e88e5;
+      }
 
-    /* Import button */
-    #importButton {
-      background-color: #ff9800;
-      color: white;
-    }
+      /* Import button */
+      #importButton {
+        background-color: #ff9800;
+        color: white;
+      }
 
-    #importButton:hover {
-      background-color: #f57c00;
-    }
+      #importButton:hover {
+        background-color: #f57c00;
+      }
 
-    /* Remove all data button */
-    #removeAllButton {
-      background-color: #f44336;
-      color: white;
-      margin-left: auto; /* Push to the right */
-    }
+      /* Remove all data button */
+      #removeAllButton {
+        background-color: #f44336;
+        color: white;
+        margin-left: auto; /* Push to the right */
+      }
 
-    #removeAllButton:hover {
-      background-color: #e53935;
-    }
+      #removeAllButton:hover {
+        background-color: #e53935;
+      }
 
-    .collapse-toggle {
-      display: inline-block;
-      font-size: 12px;
-      margin-right: 8px;
-      color: #666;
-      transition: transform 0.2s ease;
-      pointer-events: none; /* Make the icon non-interactive */
-    }
+      .collapse-toggle {
+        display: inline-block;
+        font-size: 12px;
+        margin-right: 8px;
+        color: #666;
+        transition: transform 0.2s ease;
+        pointer-events: none; /* Make the icon non-interactive */
+      }
 
-    .day-header.collapsed .collapse-toggle {
-      transform: rotate(-90deg);
-    }
+      .day-header.collapsed .collapse-toggle {
+        transform: rotate(-90deg);
+      }
 
-    .day-header {
-      cursor: pointer;
-      user-select: none;
-      padding: 10px;
-      background: #f5f5f5;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      transition: background-color 0.2s ease;
-    }
+      .day-header {
+        cursor: pointer;
+        user-select: none;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        transition: background-color 0.2s ease;
+      }
 
-    .day-header:hover {
-      background: #eaeaea;
-    }
+      .day-header:hover {
+        background: #eaeaea;
+      }
 
-    .day-content {
-      transition: max-height 0.3s ease-out;
-      max-height: 9999px;
-      overflow: hidden;
-    }
+      .day-content {
+        transition: max-height 0.3s ease-out;
+        max-height: 9999px;
+        overflow: hidden;
+      }
 
-    .day-content.collapsed {
-      max-height: 0;
-    }
+      .day-content.collapsed {
+        max-height: 0;
+      }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-    }
+      .header-left {
+        display: flex;
+        align-items: center;
+      }
 
-    .day-title {
-      font-weight: bold;
-      margin-right: 10px;
-    }
+      .day-title {
+        font-weight: bold;
+        margin-right: 10px;
+      }
 
-    .tab-count {
-      color: #666;
-      font-size: 0.9em;
-    }
+      .tab-count {
+        color: #666;
+        font-size: 0.9em;
+      }
 
-    /* Add hover effect */
-    .day-header:hover .collapse-toggle {
-      color: #333;
-    }
+      /* Add hover effect */
+      .day-header:hover .collapse-toggle {
+        color: #333;
+      }
 
-    .tab-content {
-      flex: 1;
-      min-width: 0; /* Enables text truncation in flex container */
-      margin-right: 10px;
-    }
+      .tab-content {
+        flex: 1;
+        min-width: 0; /* Enables text truncation in flex container */
+        margin-right: 10px;
+      }
 
-    .tab-title {
-      font-weight: 500;
-      margin-bottom: 4px;
-      cursor: pointer;
-      color: #2196F3;
-    }
+      .tab-title {
+        font-weight: 500;
+        margin-bottom: 4px;
+        cursor: pointer;
+        color: #2196f3;
+      }
 
-    .tab-title:hover {
-      text-decoration: underline;
-    }
+      .tab-title:hover {
+        text-decoration: underline;
+      }
 
-    .tab-url-container {
-      position: relative;
-      width: 100%;
-    }
+      .tab-url-container {
+        position: relative;
+        width: 100%;
+      }
 
-    .tab-url {
-      font-size: 0.9em;
-      color: #666;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 2px 0;
-      transition: all 0.2s ease;
-    }
+      .tab-url {
+        font-size: 0.9em;
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 2px 0;
+        transition: all 0.2s ease;
+      }
 
-    /* Optional: Show a slightly different background on hover to make it clear it's interactive */
-    .tab-url:hover {
-      background-color: #f5f5f5;
-      border-radius: 2px;
-    }
+      /* Optional: Show a slightly different background on hover to make it clear it's interactive */
+      .tab-url:hover {
+        background-color: #f5f5f5;
+        border-radius: 2px;
+      }
 
-    /* Style the tooltip */
-    .tab-url[title] {
-      cursor: help;
-    }
+      /* Style the tooltip */
+      .tab-url[title] {
+        cursor: help;
+      }
 
-    /* Make sure tab items have proper spacing and layout */
-    .tab-item {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-      min-width: 0; /* Enable truncation in flex items */
-    }
+      /* Make sure tab items have proper spacing and layout */
+      .tab-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        min-width: 0; /* Enable truncation in flex items */
+      }
 
-    .tab-item:last-child {
-      border-bottom: none;
-    }
+      .tab-item:last-child {
+        border-bottom: none;
+      }
 
-    /* Add some hover effect to the entire tab item */
-    .tab-item:hover {
-      background-color: #f9f9f9;
-    }
+      /* Add some hover effect to the entire tab item */
+      .tab-item:hover {
+        background-color: #f9f9f9;
+      }
 
-    /* Make sure the delete button doesn't shrink */
-    .tab-item .delete-button {
-      flex-shrink: 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="button-container">
-    <button id="collectButton">Collect All Current Tabs</button>
-    <button id="exportButton" class="export-button">Export Data</button>
-    <button id="importButton" class="import-button">Import Data</button>
-    <button id="removeAllButton">Remove All Data</button>
-  </div>
-  <div id="container"></div>
-  <script src="manager.js"></script>
-</body>
+      /* Make sure the delete button doesn't shrink */
+      .tab-item .delete-button {
+        flex-shrink: 0;
+      }
+
+      /* Dark theme variables */
+      :root {
+        --light-bg: #f5f5f5;
+        --light-surface: #ffffff;
+        --light-surface-accent: #f8f9fa;
+        --light-collection-bg: #e9ecef;
+        --light-border: #eee;
+        --light-text-primary: #2c3e50;
+        --light-text-secondary: #6c757d;
+        --light-highlight-bg: #fff3cd;
+        --light-highlight-border: #ffc107;
+        --light-highlight-content: #fff9e6;
+
+        /* Dark theme colors */
+        --dark-bg: #1e1e2e;
+        --dark-surface: #2a2a3c;
+        --dark-surface-accent: #313244;
+        --dark-collection-bg: #45475a;
+        --dark-border: #45475a;
+        --dark-text-primary: #cdd6f4;
+        --dark-text-secondary: #a6adc8;
+        --dark-highlight-bg: #3e3c24;
+        --dark-highlight-border: #f9e2af;
+        --dark-highlight-content: #3e3c24;
+
+        /* Default to light theme */
+        --bg: var(--light-bg);
+        --surface: var(--light-surface);
+        --surface-accent: var(--light-surface-accent);
+        --collection-bg: var(--light-collection-bg);
+        --border: var(--light-border);
+        --text-primary: var(--light-text-primary);
+        --text-secondary: var(--light-text-secondary);
+        --highlight-bg: var(--light-highlight-bg);
+        --highlight-border: var(--light-highlight-border);
+        --highlight-content: var(--light-highlight-content);
+      }
+
+      /* Dark theme class */
+      body.dark-theme {
+        --bg: var(--dark-bg);
+        --surface: var(--dark-surface);
+        --surface-accent: var(--dark-surface-accent);
+        --collection-bg: var(--dark-collection-bg);
+        --border: var(--dark-border);
+        --text-primary: var(--dark-text-primary);
+        --text-secondary: var(--dark-text-secondary);
+        --highlight-bg: var(--dark-highlight-bg);
+        --highlight-border: var(--dark-highlight-border);
+        --highlight-content: var(--dark-highlight-content);
+      }
+
+      /* Apply theme variables */
+      body {
+        background-color: var(--bg);
+        color: var(--text-primary);
+      }
+
+      .day-box {
+        background-color: var(--surface);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .day-header {
+        background-color: var(--surface-accent);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .day-title {
+        color: var(--text-primary);
+      }
+
+      .tab-count {
+        color: var(--text-secondary);
+      }
+
+      .collection-header {
+        background-color: var(--collection-bg);
+        border-bottom: 1px solid var(--border);
+        border-left: 4px solid var(--text-secondary);
+      }
+
+      .collection-header.highlighted {
+        background-color: var(--highlight-bg);
+        border-left: 4px solid var(--highlight-border);
+      }
+
+      .time-label {
+        color: var(--text-secondary);
+      }
+
+      .tab-list {
+        background-color: var(--surface);
+      }
+
+      .tab-list.highlighted {
+        background-color: var(--highlight-content);
+      }
+
+      .tab-item {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab-title {
+        color: var(--text-primary);
+      }
+
+      .tab-url {
+        color: var(--text-secondary);
+      }
+
+      .tab-item:hover {
+        background-color: var(--surface-accent);
+      }
+
+      /* Theme toggle button styles */
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        background-color: #6c757d;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+        font-size: 14px;
+        gap: 8px;
+      }
+
+      .theme-toggle:hover {
+        background-color: #5a6268;
+        transform: translateY(-1px);
+      }
+
+      .theme-toggle:active {
+        transform: translateY(0);
+      }
+
+      .theme-toggle .icon {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+      }
+
+      /* Icon for theme toggle - sun (light theme) and moon (dark theme) */
+      .theme-toggle .light-icon {
+        display: none;
+      }
+
+      .theme-toggle .dark-icon {
+        display: inline-block;
+      }
+
+      body.dark-theme .theme-toggle .light-icon {
+        display: inline-block;
+      }
+
+      body.dark-theme .theme-toggle .dark-icon {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="button-container">
+      <button id="collectButton">Collect All Current Tabs</button>
+      <button id="exportButton" class="export-button">Export Data</button>
+      <button id="importButton" class="import-button">Import Data</button>
+      <button id="themeToggle" class="theme-toggle">
+        <span class="toggle-text">Dark Mode</span>
+      </button>
+      <button id="removeAllButton">Remove All Data</button>
+    </div>
+    <div id="container"></div>
+    <script src="manager.js"></script>
+  </body>
 </html>
