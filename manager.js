@@ -112,23 +112,21 @@ async function displayTabs() {
         highlightButton.className = `button highlight-button ${
           isHighlighted ? "active" : ""
         }`;
-        highlightButton.textContent = isHighlighted
-          ? "Unhighlight"
-          : "Highlight";
+        highlightButton.title = isHighlighted ? "Unhighlight" : "Highlight";
         highlightButton.addEventListener("click", () => {
           toggleCollectionHighlight(day, timestamp);
         });
 
         const openCollectionButton = document.createElement("button");
         openCollectionButton.className = "button open-button";
-        openCollectionButton.textContent = "Open Collection";
+        openCollectionButton.title = "Open Collection";
         openCollectionButton.addEventListener("click", () => {
           openAndRemoveCollection(day, timestamp);
         });
 
         const deleteCollectionButton = document.createElement("button");
         deleteCollectionButton.className = "button delete-button";
-        deleteCollectionButton.textContent = "Remove Collection";
+        deleteCollectionButton.title = "Remove Link";
         deleteCollectionButton.addEventListener("click", async () => {
           await removeCollection(day, timestamp);
           displayTabs();
@@ -241,7 +239,7 @@ function createTabList(tabs, day) {
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "button delete-button";
-    deleteButton.textContent = "Remove";
+    deleteButton.title = "Remove Link";
     deleteButton.addEventListener("click", async () => {
       await removeTab(day, tab.timestamp, tab.url);
       displayTabs();
@@ -570,10 +568,8 @@ function initThemeToggle() {
   async function setTheme(isDark) {
     if (isDark) {
       document.body.classList.add("dark-theme");
-      toggleText.textContent = "Light Mode";
     } else {
       document.body.classList.remove("dark-theme");
-      toggleText.textContent = "Dark Mode";
     }
 
     // Save theme preference to storage
