@@ -3,6 +3,16 @@ chrome.runtime.onInstalled.addListener(async () => {
   await createManagerTab();
 });
 
+// Check if manager tab exists on browser startup
+chrome.runtime.onStartup.addListener(async () => {
+  await ensureManagerTabExists();
+});
+
+// Handle extension icon clicks
+chrome.action.onClicked.addListener(async () => {
+  await focusOrCreateManagerTab();
+});
+
 async function createManagerTab() {
   // Check if manager tab already exists
   const existingTabs = await chrome.tabs.query({
@@ -12,6 +22,39 @@ async function createManagerTab() {
   if (existingTabs.length === 0) {
     // Create new manager tab
     const tab = await chrome.tabs.create({
+      url: "manager.html",
+      pinned: true,
+    });
+  }
+}
+
+// Ensure manager tab exists, creating it if necessary
+async function ensureManagerTabExists() {
+  const managerUrl = chrome.runtime.getURL("manager.html");
+  const existingTabs = await chrome.tabs.query({ url: managerUrl });
+
+  if (existingTabs.length === 0) {
+    // No manager tab exists, create a new one
+    await chrome.tabs.create({
+      url: "manager.html",
+      pinned: true,
+    });
+  }
+}
+
+// Focus existing manager tab or create it if it doesn't exist
+async function focusOrCreateManagerTab() {
+  const managerUrl = chrome.runtime.getURL("manager.html");
+  const existingTabs = await chrome.tabs.query({ url: managerUrl });
+
+  if (existingTabs.length > 0) {
+    // Tab exists, focus it and reload
+    const tab = existingTabs[0];
+    await chrome.tabs.update(tab.id, { active: true });
+    await chrome.tabs.reload(tab.id);
+  } else {
+    // Tab doesn't exist, create it
+    await chrome.tabs.create({
       url: "manager.html",
       pinned: true,
     });
