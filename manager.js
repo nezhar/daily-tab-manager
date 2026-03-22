@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   document.getElementById("exportButton").addEventListener("click", exportTabs);
+  document
+    .getElementById("pasteMarkdownButton")
+    .addEventListener("click", importCollectionFromMarkdown);
   
   // Add search functionality
   const searchInput = document.getElementById("searchInput");
@@ -465,6 +468,99 @@ async function copyCollectionAsMarkdown(day, timestamp) {
   } catch (error) {
     console.error("Error copying collection as Markdown:", error);
     alert("Error copying collection as Markdown: " + error.message);
+  }
+}
+
+function unescapeMarkdownText(value) {
+  return value.replace(/\\([\\`*_{}\[\]()#+\-.!|>])/g, "$1");
+}
+
+function normalizeImportedUrl(rawUrl) {
+  try {
+    const parsedUrl = new URL(rawUrl);
+    if (parsedUrl.protocol === "javascript:") {
+      return null;
+    }
+    return parsedUrl.href;
+  } catch (error) {
+    return null;
+  }
+}
+
+function parseMarkdownCollection(markdown) {
+  const parsedTabs = [];
+  const seen = new Set();
+  const lines = markdown.split(/\r?\n/);
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    let match = trimmed.match(/^[*-]\s+\[(.*)\]\(<([^>]+)>\)\s*$/);
+    if (!match) {
+      match = trimmed.match(/^[*-]\s+\[(.*)\]\(([^)\s]+)\)\s*$/);
+    }
+
+    if (!match) return;
+
+    const title = unescapeMarkdownText(match[1]).trim();
+    const normalizedUrl = normalizeImportedUrl(match[2].trim());
+    if (!normalizedUrl) return;
+
+    const tabTitle = title || new URL(normalizedUrl).hostname;
+    const tabKey = `${tabTitle}|${normalizedUrl}`;
+    if (seen.has(tabKey)) return;
+
+    seen.add(tabKey);
+    parsedTabs.push({
+      title: tabTitle,
+      url: normalizedUrl,
+    });
+  });
+
+  return parsedTabs;
+}
+
+async function importCollectionFromMarkdown() {
+  try {
+    const markdown = prompt(
+      "Paste a collection in Markdown format.\n\nExample:\n- [Tab title](<https://example.com>)"
+    );
+
+    if (!markdown || !markdown.trim()) {
+      return;
+    }
+
+    const parsedTabs = parseMarkdownCollection(markdown);
+    if (parsedTabs.length === 0) {
+      throw new Error("No valid Markdown links were found.");
+    }
+
+    const data = await chrome.storage.local.get("tabsByDay");
+    const tabsByDay = data.tabsByDay || {};
+    const timestamp = Date.now();
+    const day = new Date().toISOString().split("T")[0];
+
+    if (!tabsByDay[day]) {
+      tabsByDay[day] = [];
+    }
+
+    const importedTabs = parsedTabs.map((tab) => ({
+      url: tab.url,
+      title: tab.title,
+      date: day,
+      timestamp,
+    }));
+
+    tabsByDay[day] = [...tabsByDay[day], ...importedTabs];
+    await chrome.storage.local.set({ tabsByDay });
+
+    const searchInput = document.getElementById("searchInput");
+    await displayTabs(searchInput ? searchInput.value.trim() : "");
+    alert(`Successfully imported ${importedTabs.length} links from Markdown.`);
+  } catch (error) {
+    console.error("Error importing Markdown collection:", error);
+    alert("Error importing Markdown collection: " + error.message);
   }
 }
 
