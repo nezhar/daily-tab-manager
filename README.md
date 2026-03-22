@@ -8,6 +8,7 @@ A Chrome extension that helps you organize and manage your browser tabs by autom
 - **Collections**: Group tabs into collections with a single click
 - **Timeline View**: View your tabs in a chronological timeline
 - **Highlighting**: Mark important collections for easy reference
+- **Markdown Copy**: Copy any saved collection as Markdown links
 - **Import/Export**: Backup and restore your tab collections
 - **Easy Access**: All saved tabs are accessible through a pinned tab
 
@@ -52,6 +53,7 @@ A Chrome extension that helps you organize and manage your browser tabs by autom
 ### Collections
 
 - **Open Collections**: Click "Open Collection" to restore all tabs in a collection
+- **Copy as Markdown**: Click the copy button on a collection to copy it as Markdown
 - **Highlight Collections**: Use the "Highlight" button to mark important collections
 - **Remove Collections**: Click "Remove Collection" to delete entire collections
 
