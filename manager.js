@@ -144,6 +144,13 @@ async function displayTabs(searchQuery = "") {
           openAndRemoveCollection(day, timestamp);
         });
 
+        const copyCollectionButton = document.createElement("button");
+        copyCollectionButton.className = "button copy-markdown-button";
+        copyCollectionButton.title = "Copy Collection as Markdown";
+        copyCollectionButton.addEventListener("click", async () => {
+          await copyCollectionAsMarkdown(day, timestamp);
+        });
+
         const deleteCollectionButton = document.createElement("button");
         deleteCollectionButton.className = "button delete-button";
         deleteCollectionButton.title = "Remove Link";
@@ -154,6 +161,7 @@ async function displayTabs(searchQuery = "") {
 
         buttonGroup.appendChild(highlightButton);
         buttonGroup.appendChild(openCollectionButton);
+        buttonGroup.appendChild(copyCollectionButton);
         buttonGroup.appendChild(deleteCollectionButton);
 
         collectionHeader.appendChild(timeLabel);
@@ -387,6 +395,76 @@ async function removeCollection(day, timestamp) {
     }
   } catch (error) {
     console.error("Error in removeCollection:", error);
+  }
+}
+
+function escapeMarkdownText(value) {
+  return value.replace(/([\\`*_{}\[\]()#+\-.!|>])/g, "\\$1");
+}
+
+function buildCollectionMarkdown(day, timestamp, tabs) {
+  const numericTimestamp = Number(timestamp);
+  const header =
+    numericTimestamp > 0
+      ? `## ${formatDate(day)} - ${formatTime(timestamp)}`
+      : `## ${formatDate(day)} - Older tabs`;
+  const lines = [header, ""];
+
+  tabs.forEach((tab) => {
+    const tabTitle = tab.title || new URL(tab.url).hostname;
+    const escapedTitle = escapeMarkdownText(tabTitle);
+    const safeUrl = tab.url.replace(/>/g, "%3E");
+    lines.push(`- [${escapedTitle}](<${safeUrl}>)`);
+  });
+
+  return lines.join("\n");
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.top = "-9999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  const didCopy = document.execCommand("copy");
+  document.body.removeChild(textArea);
+
+  if (!didCopy) {
+    throw new Error("Clipboard copy is not supported in this environment.");
+  }
+}
+
+async function copyCollectionAsMarkdown(day, timestamp) {
+  try {
+    const data = await chrome.storage.local.get("tabsByDay");
+    const tabsByDay = data.tabsByDay || {};
+
+    if (!tabsByDay[day]) {
+      throw new Error("Collection not found.");
+    }
+
+    const collectionTabs = tabsByDay[day].filter(
+      (tab) => String(tab.timestamp) === String(timestamp)
+    );
+
+    if (collectionTabs.length === 0) {
+      throw new Error("Collection not found.");
+    }
+
+    const markdown = buildCollectionMarkdown(day, timestamp, collectionTabs);
+    await copyTextToClipboard(markdown);
+    alert(`Copied ${collectionTabs.length} links as Markdown.`);
+  } catch (error) {
+    console.error("Error copying collection as Markdown:", error);
+    alert("Error copying collection as Markdown: " + error.message);
   }
 }
 
