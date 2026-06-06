@@ -1,3 +1,41 @@
+function getSearchQuery() {
+  const searchInput = document.getElementById("searchInput");
+  return searchInput ? searchInput.value.trim() : "";
+}
+
+function getDateFilterSelect() {
+  return document.getElementById("dateFilterSelect");
+}
+
+function refreshDateFilterOptions(tabsByDay) {
+  const select = getDateFilterSelect();
+  if (!select || !window.TabDateFilters) {
+    return window.TabDateFilters
+      ? window.TabDateFilters.DEFAULT_DATE_FILTER
+      : "months:3";
+  }
+
+  const previousValue = select.value || window.TabDateFilters.DEFAULT_DATE_FILTER;
+  const options = window.TabDateFilters.getDateFilterOptions(tabsByDay);
+  const hasPreviousValue = options.some(
+    (option) => option.value === previousValue
+  );
+
+  select.innerHTML = "";
+  options.forEach((option) => {
+    const optionElement = document.createElement("option");
+    optionElement.value = option.value;
+    optionElement.textContent = option.label;
+    select.appendChild(optionElement);
+  });
+
+  select.value = hasPreviousValue
+    ? previousValue
+    : window.TabDateFilters.DEFAULT_DATE_FILTER;
+
+  return select.value;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("collectButton")
@@ -25,16 +63,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add search functionality
   const searchInput = document.getElementById("searchInput");
   searchInput.addEventListener("input", () => {
-    displayTabs(searchInput.value.trim());
+    displayTabs(getSearchQuery());
   });
 
+  const dateFilterSelect = getDateFilterSelect();
+  if (dateFilterSelect) {
+    dateFilterSelect.addEventListener("change", () => {
+      displayTabs(getSearchQuery());
+    });
+  }
+
   displayTabs();
-  setInterval(() => displayTabs(searchInput.value.trim()), 60000);
+  setInterval(() => displayTabs(getSearchQuery()), 60000);
 });
 
-async function displayTabs(searchQuery = "") {
+async function displayTabs(searchQuery) {
   try {
     const container = document.getElementById("container");
+    const effectiveSearchQuery =
+      typeof searchQuery === "string" ? searchQuery : getSearchQuery();
     const data = await chrome.storage.local.get([
       "tabsByDay",
       "highlightedCollections",
@@ -43,26 +90,21 @@ async function displayTabs(searchQuery = "") {
     const tabsByDay = data.tabsByDay || {};
     const highlightedCollections = data.highlightedCollections || {};
     const collapsedDays = data.collapsedDays || {};
+    const selectedDateFilter = refreshDateFilterOptions(tabsByDay);
+    const filteredTabsByDay = window.TabDateFilters.buildFilteredTabsByDay(
+      tabsByDay,
+      selectedDateFilter,
+      effectiveSearchQuery,
+      new Date()
+    );
 
     // Sort days in reverse chronological order
-    const sortedDays = Object.keys(tabsByDay).sort().reverse();
+    const sortedDays = Object.keys(filteredTabsByDay).sort().reverse();
 
     container.innerHTML = "";
 
     sortedDays.forEach((day) => {
-      const tabs = tabsByDay[day];
-      
-      // Filter tabs based on search query if one exists
-      const filteredTabs = searchQuery
-        ? tabs.filter(
-            (tab) =>
-              tab.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              tab.url.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-        : tabs;
-
-      // Skip empty days after filtering
-      if (filteredTabs.length === 0) return;
+      const filteredTabs = filteredTabsByDay[day];
 
       const dayBox = document.createElement("div");
       dayBox.className = "day-box";
@@ -159,7 +201,7 @@ async function displayTabs(searchQuery = "") {
         deleteCollectionButton.title = "Remove Link";
         deleteCollectionButton.addEventListener("click", async () => {
           await removeCollection(day, timestamp);
-          displayTabs(searchQuery);
+          displayTabs(effectiveSearchQuery);
         });
 
         buttonGroup.appendChild(highlightButton);
