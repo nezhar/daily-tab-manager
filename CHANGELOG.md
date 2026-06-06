@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.0] - 2026-06-06
+
+### Added
+- Date range filter for saved tabs with Past 3 Months, Past 6 Months, Past 12 Months, All, and year-specific options.
+
 ## [1.1.0] - 2026-03-22
 
 ### Added
