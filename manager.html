@@ -211,6 +211,8 @@
 
       .button-container {
         display: flex;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
         margin-bottom: 20px;
         padding: 10px;
@@ -709,6 +711,11 @@
         margin: 0 10px;
       }
 
+      .date-filter-container {
+        position: relative;
+        margin-right: 10px;
+      }
+
       #searchInput {
         padding: 10px 12px;
         border: 1px solid var(--border);
@@ -730,8 +737,26 @@
         color: var(--text-secondary);
       }
 
+      #dateFilterSelect {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 14px;
+        width: 160px;
+        background-color: var(--surface);
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+      }
+
+      #dateFilterSelect:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
       /* Dark theme adjustments */
-      body.dark-theme #searchInput {
+      body.dark-theme #searchInput,
+      body.dark-theme #dateFilterSelect {
         background-color: var(--surface-accent);
       }
     </style>
@@ -746,9 +771,13 @@
       <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search tabs..." title="Search by title or URL">
       </div>
+      <div class="date-filter-container">
+        <select id="dateFilterSelect" title="Filter saved tabs by date range"></select>
+      </div>
       <button id="removeAllButton" title="Remove All Data"></button>
     </div>
     <div id="container"></div>
+    <script src="dateFilters.js"></script>
     <script src="manager.js"></script>
   </body>
 </html>
